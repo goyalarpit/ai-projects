@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mood Music</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- SCREEN 1: Welcome -->
+  <div id="screen-welcome" class="screen active">
+    <div class="center">
+      <h1 class="logo">&#9675;</h1>
+      <h2>How are you feeling?</h2>
+      <p class="subtitle">Speak for 30 seconds. We'll find music<br>to guide you back to calm.</p>
+      <button id="btn-start" class="btn-primary">Begin</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: Recording -->
+  <div id="screen-record" class="screen">
+    <div class="center">
+      <div id="mic-ring">
+        <div id="mic-icon">&#127908;</div>
+      </div>
+      <p id="record-prompt">Tell us how you're feeling...</p>
+      <div id="timer">0:30</div>
+      <button id="btn-done" class="btn-secondary" style="display:none">I'm done</button>
+      <button id="btn-cancel" class="btn-ghost">Cancel</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: Processing -->
+  <div id="screen-processing" class="screen">
+    <div class="center">
+      <div class="spinner"></div>
+      <p>Listening to how you feel...</p>
+    </div>
+  </div>
+
+  <!-- SCREEN 4: Playlist -->
+  <div id="screen-playlist" class="screen">
+    <div class="playlist-header">
+      <p id="mood-summary"></p>
+    </div>
+    <div id="phases-container"></div>
+    <div class="playlist-footer">
+      <button id="btn-restart" class="btn-ghost">Start over</button>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -2,3 +2,5 @@ requests
 python-dotenv
 psycopg2-binary
 anthropic
+fastapi
+uvicorn[standard]
