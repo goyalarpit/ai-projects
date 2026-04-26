@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wanderlust — Hawa Mahal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Jost:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Jost', sans-serif;
+  background: #0A0603;
+  color: #F0C840;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#app {
+  width: 100%;
+  max-width: 420px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.screen { display: none; width: 100%; flex-direction: column; align-items: center; padding: 20px; }
+.screen.active { display: flex; }
+
+#sky {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: #0A0603;
+  transition: background 1.5s ease;
+  z-index: -1;
+}
+
+/* ── STORY SCREEN ── */
+#story-screen { justify-content: center; min-height: 100vh; }
+.story-badge { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.6; margin-bottom: 16px; }
+.story-chapter { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; text-align: center; margin-bottom: 24px; line-height: 1.3; }
+.story-text { font-family: 'Cormorant Garamond', serif; font-size: 17px; line-height: 1.8; text-align: center; opacity: 0.85; max-width: 340px; margin-bottom: 40px; }
+.story-palace { font-size: 80px; margin-bottom: 20px; }
+.btn-primary {
+  background: #F0C840; color: #0A0603;
+  border: none; padding: 14px 40px;
+  font-family: 'Jost', sans-serif; font-size: 15px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; border-radius: 4px;
+  transition: opacity 0.2s;
+}
+.btn-primary:hover { opacity: 0.85; }
+
+/* ── PUZZLE SCREEN ── */
+#puzzle-screen { padding: 16px; }
+.puzzle-header { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.puzzle-title { font-size: 13px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; }
+.puzzle-progress { font-size: 13px; opacity: 0.7; }
+
+#palace-wrap { width: 100%; margin-bottom: 16px; }
+#palace-svg { width: 100%; height: 120px; }
+
+#window-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; text-align: center; margin-bottom: 4px; }
+#window-sub { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.5; margin-bottom: 16px; }
+
+#grid-wrap {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(240,200,64,0.15);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  display: inline-block;
+}
+#grid { display: grid; gap: 3px; }
+
+.cell {
+  width: 48px; height: 48px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.cell.inactive { background: rgba(255,255,255,0.03); cursor: default; }
+.cell.empty { background: rgba(240,200,64,0.08); border: 1px solid rgba(240,200,64,0.18); }
+.cell.valid-target { background: rgba(240,200,64,0.25); border: 1px solid rgba(240,200,64,0.6); animation: pulse 0.8s infinite alternate; }
+.cell.filled { cursor: pointer; }
+@keyframes pulse { from { opacity: 0.7; } to { opacity: 1; } }
+
+#tray-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.4; margin-bottom: 10px; align-self: flex-start; }
+#tray { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; min-height: 64px; }
+
+.piece-btn {
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.piece-btn:hover { transform: scale(1.05); }
+.piece-btn.selected { border-color: #F0C840; }
+.piece-cell { width: 16px; height: 16px; border-radius: 2px; }
+
+#controls { display: flex; gap: 12px; width: 100%; }
+#hint-btn {
+  flex: 1; padding: 12px;
+  background: transparent; border: 1px solid rgba(240,200,64,0.3);
+  color: #F0C840; font-family: 'Jost', sans-serif; font-size: 13px;
+  letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; border-radius: 4px; transition: border-color 0.2s;
+}
+#hint-btn:hover { border-color: #F0C840; }
+#reset-btn {
+  padding: 12px 20px;
+  background: transparent; border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.4); font-family: 'Jost', sans-serif; font-size: 13px;
+  letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; border-radius: 4px;
+}
+#reset-btn:hover { border-color: rgba(255,255,255,0.4); color: rgba(255,255,255,0.7); }
+
+.stars { display: flex; gap: 4px; font-size: 18px; margin-bottom: 8px; }
+
+#toast {
+  position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+  background: #F0C840; color: #0A0603;
+  padding: 12px 24px; border-radius: 24px;
+  font-size: 13px; font-weight: 700; letter-spacing: 1px;
+  opacity: 0; transition: opacity 0.3s;
+  pointer-events: none; white-space: nowrap; z-index: 100;
+}
+#toast.show { opacity: 1; }
+
+/* ── WIN SCREEN ── */
+#win-screen { justify-content: center; min-height: 100vh; }
+.stamp-card {
+  border: 2px solid #F0C840;
+  border-radius: 12px;
+  padding: 32px 28px;
+  text-align: center;
+  max-width: 300px;
+  margin-bottom: 32px;
+}
+.stamp-icon { font-size: 64px; margin-bottom: 12px; }
+.stamp-name { font-family: 'Cormorant Garamond', serif; font-size: 28px; margin-bottom: 4px; }
+.stamp-city { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.5; margin-bottom: 16px; }
+.stamp-fact { font-size: 13px; line-height: 1.7; opacity: 0.7; }
+.win-label { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.5; margin-bottom: 8px; }
+
+.cell.wrong { animation: wrong-flash 0.4s; }
+@keyframes wrong-flash {
+  0%,100% { background: rgba(240,200,64,0.08); }
+  50% { background: rgba(255,80,80,0.4); }
+}
+</style>
+</head>
+<body>
+<div id="sky"></div>
+<div id="app">
+
+  <!-- STORY SCREEN -->
+  <div id="story-screen" class="screen active">
+    <div class="story-palace">🏯</div>
+    <div class="story-badge">Wanderlust · Jaipur, India</div>
+    <div class="story-chapter" id="story-chapter">Hawa Mahal</div>
+    <div class="story-text" id="story-text"></div>
+    <button class="btn-primary" id="story-btn">Begin Puzzle</button>
+  </div>
+
+  <!-- PUZZLE SCREEN -->
+  <div id="puzzle-screen" class="screen">
+    <div class="puzzle-header">
+      <span class="puzzle-title">Hawa Mahal</span>
+      <span class="puzzle-progress" id="progress-text">Window 1 of 5</span>
+    </div>
+    <div id="palace-wrap">
+      <svg id="palace-svg" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg">
+        <g id="pal-base">
+          <rect x="0" y="80" width="400" height="40" fill="#1a0f05" opacity="0.8"/>
+          <rect x="20" y="60" width="360" height="25" fill="#1a0f05" opacity="0.8"/>
+        </g>
+        <g id="pal-w1" opacity="0.2"><rect x="25" y="40" width="55" height="35" rx="4" fill="#8B4513"/><rect x="35" y="20" width="35" height="25" rx="14" fill="#8B4513"/></g>
+        <g id="pal-w2" opacity="0.2"><rect x="90" y="30" width="55" height="45" rx="4" fill="#8B4513"/><rect x="100" y="8" width="35" height="28" rx="14" fill="#8B4513"/></g>
+        <g id="pal-w3" opacity="0.2"><rect x="160" y="20" width="80" height="55" rx="4" fill="#8B4513"/><rect x="175" y="0" width="50" height="30" rx="20" fill="#8B4513"/></g>
+        <g id="pal-w4" opacity="0.2"><rect x="255" y="30" width="55" height="45" rx="4" fill="#8B4513"/><rect x="265" y="8" width="35" height="28" rx="14" fill="#8B4513"/></g>
+        <g id="pal-w5" opacity="0.2"><rect x="320" y="40" width="55" height="35" rx="4" fill="#8B4513"/><rect x="330" y="20" width="35" height="25" rx="14" fill="#8B4513"/></g>
+      </svg>
+    </div>
+    <div id="window-name">Side Gallery Window</div>
+    <div id="window-sub">Fill the frame · Window 1 of 5</div>
+    <div id="grid-wrap"><div id="grid"></div></div>
+    <div id="tray-label">Pieces</div>
+    <div id="tray"></div>
+    <div id="controls">
+      <button id="hint-btn">💡 Hint</button>
+      <button id="reset-btn">Reset</button>
+    </div>
+  </div>
+
+  <!-- WIN SCREEN -->
+  <div id="win-screen" class="screen">
+    <div class="win-label">Palace Awakened</div>
+    <div class="stamp-card">
+      <div class="stamp-icon">🏯</div>
+      <div class="stamp-name">Hawa Mahal</div>
+      <div class="stamp-city">Jaipur · Rajasthan · India</div>
+      <div class="stars" id="win-stars"></div>
+      <div class="stamp-fact">Built in 1799 by Maharaja Sawai Pratap Singh, Hawa Mahal's 953 windows were designed so royal women could observe street life while remaining unseen.</div>
+    </div>
+    <button class="btn-primary" id="next-city-btn">Explore Next City →</button>
+  </div>
+
+</div>
+<div id="toast"></div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+
+const COLORS = {
+  terracotta: '#C1440E',
+  gold:       '#D4A017',
+  blue:       '#1B4F8A',
+  brown:      '#6B3A2A',
+  green:      '#2D6A4F',
+  rose:       '#B5445A',
+  sand:       '#C9A96E',
+};
+
+const WINDOWS = [
+  {
+    name: 'Side Gallery Window',
+    cols: 4, rows: 4,
+    active: [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+    pieces: [
+      { id:'p1', shape:[[0,0],[0,1],[1,0],[1,1]], color:'gold'       },
+      { id:'p2', shape:[[0,0],[1,0],[2,0],[2,1]], color:'terracotta' },
+      { id:'p3', shape:[[0,0],[0,1],[1,1],[2,1]], color:'blue'       },
+      { id:'p4', shape:[[0,0],[0,1]],             color:'brown'      },
+      { id:'p5', shape:[[0,0]],                   color:'sand'       },
+    ],
+  },
+  {
+    name: 'Left Tower Arch',
+    cols: 4, rows: 5,
+    active: [0,1,1,0, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+    pieces: [
+      { id:'p1', shape:[[0,0],[0,1],[1,0],[1,1]], color:'gold'       },
+      { id:'p2', shape:[[0,0],[1,0],[2,0],[2,1]], color:'terracotta' },
+      { id:'p3', shape:[[0,0],[0,1],[1,1],[2,1]], color:'blue'       },
+      { id:'p4', shape:[[0,0],[1,0],[1,1],[2,1]], color:'rose'       },
+      { id:'p5', shape:[[0,0],[0,1]],             color:'brown'      },
+      { id:'p6', shape:[[0,0]],                   color:'sand'       },
+    ],
+  },
+  {
+    name: 'Central Royal Arch',
+    cols: 5, rows: 5,
+    active: [0,1,1,1,0, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1],
+    pieces: [
+      { id:'p1', shape:[[0,0],[0,1],[1,0],[1,1]], color:'gold'       },
+      { id:'p2', shape:[[0,0],[1,0],[2,0],[2,1]], color:'terracotta' },
+      { id:'p3', shape:[[0,0],[0,1],[1,1],[2,1]], color:'blue'       },
+      { id:'p4', shape:[[0,0],[1,0],[1,1],[2,1]], color:'rose'       },
+      { id:'p5', shape:[[0,0],[0,1],[0,2],[1,1]], color:'green'      },
+      { id:'p6', shape:[[0,0],[0,1]],             color:'brown'      },
+      { id:'p7', shape:[[0,0]],                   color:'sand'       },
+    ],
+  },
+  {
+    name: 'Right Tower Arch',
+    cols: 4, rows: 5,
+    active: [0,1,1,0, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+    pieces: [
+      { id:'p1', shape:[[0,0],[0,1],[1,0],[1,1]], color:'gold'       },
+      { id:'p2', shape:[[0,0],[1,0],[2,0],[1,1]], color:'terracotta' },
+      { id:'p3', shape:[[0,0],[0,1],[1,0],[2,0]], color:'blue'       },
+      { id:'p4', shape:[[0,0],[1,0],[1,1],[2,1]], color:'rose'       },
+      { id:'p5', shape:[[0,0],[0,1]],             color:'brown'      },
+      { id:'p6', shape:[[0,0]],                   color:'sand'       },
+    ],
+  },
+  {
+    name: 'Grand Entrance',
+    cols: 4, rows: 6,
+    active: [0,1,1,0, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+    pieces: [
+      { id:'p1', shape:[[0,0],[0,1],[1,0],[1,1]], color:'gold'       },
+      { id:'p2', shape:[[0,0],[1,0],[2,0],[2,1]], color:'terracotta' },
+      { id:'p3', shape:[[0,0],[0,1],[1,1],[2,1]], color:'blue'       },
+      { id:'p4', shape:[[0,0],[1,0],[1,1],[2,1]], color:'rose'       },
+      { id:'p5', shape:[[0,0],[0,1],[0,2],[1,1]], color:'green'      },
+      { id:'p6', shape:[[0,0],[0,1]],             color:'brown'      },
+      { id:'p7', shape:[[0,0]],                   color:'sand'       },
+    ],
+  },
+];
+
+const STORY = [
+  { chapter:'Outer Gallery',  text:'I am the wind of the Thar desert. Every morning I arrive at Hawa Mahal\'s gates. Every morning the frames are empty. Fill them. Let me in.' },
+  { chapter:'Left Tower',     text:'I slipped through the outer gallery. But the three great towers still sleep. Their arched eyes are shut. I must go higher.' },
+  { chapter:'Central Arch',   text:'The royal arch. The grandest window. No wind has passed through in two centuries. Today that changes.' },
+  { chapter:'Right Tower',    text:'I move symmetrically, as the architect intended. The right tower mirrors the left. Balance restored.' },
+  { chapter:'Grand Entrance', text:'The deepest chamber. The queen\'s entrance. One last frame to fill. Guide me home.' },
+];
+
+const SKY_COLORS = ['#0A0603','#1A0E08','#2D1A0A','#5C3010','#8B5020','#F0C840'];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+
+const state = {
+  windowIdx: 0,
+  selectedPiece: null,
+  grid: [],
+  pieces: [],
+  wrongPlacements: 0,
+  completedWindows: [],
+};
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+
+const idx = (r, c, cols) => r * cols + c;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function setSky(level) {
+  document.getElementById('sky').style.background = SKY_COLORS[Math.min(level, SKY_COLORS.length - 1)];
+}
+
+function lightPalaceWindow(n) {
+  const el = document.getElementById('pal-w' + (n + 1));
+  if (!el) return;
+  el.style.transition = 'opacity 1.2s';
+  el.style.opacity = '1';
+  el.querySelectorAll('rect').forEach(r => {
+    r.setAttribute('fill', '#F0C840');
+  });
+}
+
+function getPiece(id) { return state.pieces.find(p => p.id === id); }
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+
+function renderGrid() {
+  const win = WINDOWS[state.windowIdx];
+  const grid = document.getElementById('grid');
+  grid.style.gridTemplateColumns = `repeat(${win.cols}, 48px)`;
+  grid.innerHTML = '';
+
+  for (let r = 0; r < win.rows; r++) {
+    for (let c = 0; c < win.cols; c++) {
+      const i = idx(r, c, win.cols);
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.row = r;
+      cell.dataset.col = c;
+
+      if (!win.active[i]) {
+        cell.classList.add('inactive');
+      } else if (state.grid[i]) {
+        const piece = getPiece(state.grid[i]);
+        cell.classList.add('filled');
+        cell.style.background = COLORS[piece.color];
+        cell.style.border = '1px solid rgba(0,0,0,0.3)';
+        cell.addEventListener('click', () => liftPiece(r, c));
+      } else {
+        cell.classList.add('empty');
+        if (state.selectedPiece && canPlace(state.selectedPiece, r, c)) {
+          cell.classList.add('valid-target');
+        }
+        cell.addEventListener('click', () => placePiece(r, c));
+      }
+      grid.appendChild(cell);
+    }
+  }
+}
+
+function renderTray() {
+  const tray = document.getElementById('tray');
+  tray.innerHTML = '';
+  state.pieces.forEach(piece => {
+    if (piece.placed) return;
+    const rows = Math.max(...piece.shape.map(([r]) => r)) + 1;
+    const cols = Math.max(...piece.shape.map(([,c]) => c)) + 1;
+    const btn = document.createElement('div');
+    btn.className = 'piece-btn' + (state.selectedPiece === piece.id ? ' selected' : '');
+    btn.style.gridTemplateColumns = `repeat(${cols}, 16px)`;
+    btn.style.gridTemplateRows    = `repeat(${rows}, 16px)`;
+
+    const cells = Array.from({ length: rows * cols }, () => {
+      const d = document.createElement('div');
+      d.className = 'piece-cell';
+      return d;
+    });
+    piece.shape.forEach(([r, c]) => {
+      cells[r * cols + c].style.background = COLORS[piece.color];
+    });
+    cells.forEach(c => btn.appendChild(c));
+    btn.addEventListener('click', () => selectPiece(piece.id));
+    tray.appendChild(btn);
+  });
+}
+
+// ── PIECE LOGIC ───────────────────────────────────────────────────────────────
+
+function selectPiece(id) {
+  state.selectedPiece = state.selectedPiece === id ? null : id;
+  renderGrid();
+  renderTray();
+}
+
+function canPlace(pieceId, row, col) {
+  const win = WINDOWS[state.windowIdx];
+  const piece = getPiece(pieceId);
+  return piece.shape.every(([dr, dc]) => {
+    const r = row + dr, c = col + dc;
+    if (r < 0 || r >= win.rows || c < 0 || c >= win.cols) return false;
+    const i = idx(r, c, win.cols);
+    return win.active[i] && !state.grid[i];
+  });
+}
+
+function placePiece(row, col) {
+  if (!state.selectedPiece) return;
+  if (!canPlace(state.selectedPiece, row, col)) {
+    state.wrongPlacements++;
+    const win = WINDOWS[state.windowIdx];
+    const cells = document.getElementById('grid').querySelectorAll('.cell');
+    const i = idx(row, col, win.cols);
+    cells[i].classList.add('wrong');
+    setTimeout(() => cells[i].classList.remove('wrong'), 400);
+    return;
+  }
+  const win = WINDOWS[state.windowIdx];
+  const piece = getPiece(state.selectedPiece);
+  piece.shape.forEach(([dr, dc]) => {
+    state.grid[idx(row + dr, col + dc, win.cols)] = piece.id;
+  });
+  piece.placed = true;
+  state.selectedPiece = null;
+  renderGrid();
+  renderTray();
+  checkCompletion();
+}
+
+function liftPiece(row, col) {
+  const win = WINDOWS[state.windowIdx];
+  const pieceId = state.grid[idx(row, col, win.cols)];
+  if (!pieceId) return;
+  const piece = getPiece(pieceId);
+  for (let r = 0; r < win.rows; r++)
+    for (let c = 0; c < win.cols; c++)
+      if (state.grid[idx(r, c, win.cols)] === pieceId)
+        state.grid[idx(r, c, win.cols)] = null;
+  piece.placed = false;
+  state.selectedPiece = pieceId;
+  renderGrid();
+  renderTray();
+}
+
+function checkCompletion() {
+  const win = WINDOWS[state.windowIdx];
+  const done = win.active.every((active, i) => !active || state.grid[i]);
+  if (!done) return;
+
+  const stars = state.wrongPlacements === 0 ? 3 : state.wrongPlacements <= 3 ? 2 : 1;
+  state.completedWindows.push({ idx: state.windowIdx, stars });
+  lightPalaceWindow(state.windowIdx);
+  setSky(state.completedWindows.length);
+  showToast('✨ ' + win.name + ' restored!');
+
+  if (state.windowIdx < WINDOWS.length - 1) {
+    setTimeout(() => {
+      state.windowIdx++;
+      loadWindow(state.windowIdx);
+      loadStory(state.windowIdx);
+      showScreen('story-screen');
+    }, 1800);
+  } else {
+    setTimeout(showWin, 1800);
+  }
+}
+
+// ── HINT / RESET ──────────────────────────────────────────────────────────────
+
+document.getElementById('hint-btn').addEventListener('click', () => {
+  const next = state.pieces.find(p => !p.placed);
+  if (!next) return;
+  showToast('Try the ' + next.color + ' piece next');
+  selectPiece(next.id);
+});
+
+document.getElementById('reset-btn').addEventListener('click', () => loadWindow(state.windowIdx));
+
+// ── WINDOW LOADER ─────────────────────────────────────────────────────────────
+
+function loadWindow(i) {
+  const win = WINDOWS[i];
+  state.grid = win.active.map(() => null);
+  state.pieces = win.pieces.map(p => ({ ...p, shape: p.shape.map(s => [...s]), placed: false }));
+  state.selectedPiece = null;
+  state.wrongPlacements = 0;
+  document.getElementById('window-name').textContent = win.name;
+  document.getElementById('window-sub').textContent = 'Fill the frame · Window ' + (i+1) + ' of ' + WINDOWS.length;
+  document.getElementById('progress-text').textContent = 'Window ' + (i+1) + ' of ' + WINDOWS.length;
+  renderGrid();
+  renderTray();
+}
+
+// ── STORY ─────────────────────────────────────────────────────────────────────
+
+function loadStory(i) {
+  const s = STORY[i];
+  document.getElementById('story-chapter').textContent = s.chapter;
+  document.getElementById('story-text').textContent = s.text;
+  document.getElementById('story-btn').textContent = i === 0 ? 'Begin Puzzle' : 'Continue';
+}
+
+document.getElementById('story-btn').addEventListener('click', () => showScreen('puzzle-screen'));
+
+// ── WIN ───────────────────────────────────────────────────────────────────────
+
+function showWin() {
+  const total = state.completedWindows.reduce((s, w) => s + w.stars, 0);
+  const filled = Math.round((total / (WINDOWS.length * 3)) * 3);
+  document.getElementById('win-stars').innerHTML =
+    [0,1,2].map(i => i < filled ? '⭐' : '☆').join('');
+  showScreen('win-screen');
+}
+
+document.getElementById('next-city-btn').addEventListener('click', () => showToast('More cities coming soon! 🌍'));
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+loadStory(0);
+loadWindow(0);
+setSky(0);
+</script>
+</body>
+</html>
