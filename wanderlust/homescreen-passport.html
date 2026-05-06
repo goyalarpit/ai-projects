@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wanderlust — Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Jost', sans-serif;
+  background: #080604;
+  color: #F0C840;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── WORLD MAP BG ── */
+#map-bg {
+  position: fixed;
+  inset: 0;
+  opacity: 0.07;
+  overflow: hidden;
+}
+#map-bg svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── GLOW VIGNETTE ── */
+#vignette {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 60%, transparent 30%, #080604 80%);
+  pointer-events: none;
+}
+
+/* ── JAIPUR GLOW DOT ── */
+#jaipur-dot {
+  position: fixed;
+  /* roughly India on a world map centered at 50%/50% */
+  left: 62%;
+  top: 42%;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #F0C840;
+  box-shadow: 0 0 0 0 rgba(240,200,64,0.6);
+  animation: glow-pulse 2.4s ease infinite;
+  transform: translate(-50%, -50%);
+}
+#jaipur-dot::after {
+  content: 'Jaipur';
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.7;
+  color: #F0C840;
+}
+@keyframes glow-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(240,200,64,0.7); }
+  60%  { box-shadow: 0 0 0 14px rgba(240,200,64,0); }
+  100% { box-shadow: 0 0 0 0 rgba(240,200,64,0); }
+}
+
+/* ── APP SHELL ── */
+#app {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 400px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+/* ── WORDMARK ── */
+.wordmark {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  opacity: 0.45;
+  margin-bottom: 32px;
+  animation: fadeUp 1s ease 0.2s both;
+}
+
+/* ── PASSPORT CARD ── */
+.passport {
+  width: 100%;
+  max-width: 320px;
+  background: linear-gradient(160deg, #1C2B1A 0%, #142212 60%, #0F1A0E 100%);
+  border-radius: 12px;
+  padding: 28px 28px 24px;
+  position: relative;
+  box-shadow:
+    0 2px 0 rgba(255,255,255,0.06) inset,
+    0 -1px 0 rgba(0,0,0,0.4) inset,
+    0 24px 60px rgba(0,0,0,0.7),
+    0 4px 12px rgba(0,0,0,0.5);
+  animation: fadeUp 1s ease 0.4s both;
+  overflow: hidden;
+  transform: rotate(-1.5deg);
+}
+
+/* Subtle texture overlay */
+.passport::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 4px
+    );
+  pointer-events: none;
+  border-radius: 12px;
+}
+
+/* Gold foil strip at top */
+.passport-foil {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #C9A84C, #F0C840, #C9A84C, transparent);
+  border-radius: 12px 12px 0 0;
+  opacity: 0.7;
+}
+
+/* Country header */
+.passport-country {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.passport-emblem {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(240,200,64,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: rgba(240,200,64,0.06);
+  flex-shrink: 0;
+}
+.passport-country-text {
+  display: flex;
+  flex-direction: column;
+}
+.passport-country-name {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.5;
+  color: #d4b87a;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.passport-type {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #e8d5a3;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Divider */
+.passport-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(240,200,64,0.2), transparent);
+  margin-bottom: 18px;
+}
+
+/* Photo + info row */
+.passport-info-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.passport-photo {
+  width: 60px;
+  height: 72px;
+  background: rgba(240,200,64,0.06);
+  border: 1px solid rgba(240,200,64,0.15);
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  overflow: hidden;
+}
+.passport-fields { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.passport-field { display: flex; flex-direction: column; gap: 2px; }
+.field-label {
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.35;
+  color: #d4b87a;
+}
+.field-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  color: #e8d5a3;
+  letter-spacing: 0.5px;
+}
+.field-value.empty {
+  font-style: italic;
+  opacity: 0.35;
+  font-size: 14px;
+}
+
+/* Stamps section */
+.passport-stamps-label {
+  font-size: 8px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.3;
+  color: #d4b87a;
+  margin-bottom: 10px;
+}
+.passport-stamps-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.stamp-slot {
+  width: 52px;
+  height: 52px;
+  border: 1.5px dashed rgba(240,200,64,0.15);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  position: relative;
+}
+.stamp-slot.empty-slot {
+  opacity: 0.25;
+}
+.stamp-slot.active-slot {
+  border-color: rgba(240,200,64,0.45);
+  background: rgba(240,200,64,0.05);
+  opacity: 1;
+  box-shadow: 0 0 12px rgba(240,200,64,0.1);
+}
+.stamp-slot.active-slot::after {
+  content: 'Next';
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #F0C840;
+  opacity: 0.5;
+  white-space: nowrap;
+}
+
+/* MRZ strip */
+.passport-mrz {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  font-family: 'Courier New', monospace;
+  font-size: 7px;
+  color: rgba(240,200,64,0.18);
+  letter-spacing: 1px;
+  line-height: 1.6;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* ── STATS ROW ── */
+.stats-row {
+  display: flex;
+  gap: 24px;
+  margin: 28px 0 32px;
+  animation: fadeUp 1s ease 0.6s both;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  color: #F0C840;
+  line-height: 1;
+}
+.stat-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.35;
+}
+.stat-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(255,255,255,0.08);
+  align-self: center;
+}
+
+/* ── CTA ── */
+.cta-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  animation: fadeUp 1s ease 0.8s both;
+}
+.btn-begin {
+  padding: 16px 52px;
+  background: #F0C840;
+  color: #080604;
+  border: none;
+  font-family: 'Jost', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: opacity 0.2s, transform 0.15s;
+  box-shadow: 0 8px 24px rgba(240,200,64,0.25);
+}
+.btn-begin:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-begin:active { transform: scale(0.97); }
+
+.cta-sub {
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  opacity: 0.3;
+  text-transform: uppercase;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<!-- Faint world map background -->
+<div id="map-bg">
+  <!-- Simplified SVG world continents -->
+  <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <!-- North America -->
+    <path d="M80,60 L180,50 L220,80 L230,140 L200,180 L160,200 L120,190 L90,160 L70,120 Z" fill="#F0C840"/>
+    <!-- South America -->
+    <path d="M160,220 L220,210 L250,260 L240,340 L200,370 L160,350 L140,300 L145,250 Z" fill="#F0C840"/>
+    <!-- Europe -->
+    <path d="M420,50 L500,45 L520,80 L500,110 L460,120 L430,100 L410,80 Z" fill="#F0C840"/>
+    <!-- Africa -->
+    <path d="M430,130 L510,120 L540,160 L540,280 L500,320 L450,310 L420,270 L410,200 L420,160 Z" fill="#F0C840"/>
+    <!-- Asia -->
+    <path d="M520,40 L720,30 L780,70 L800,130 L760,160 L700,150 L640,170 L580,160 L540,120 L520,80 Z" fill="#F0C840"/>
+    <!-- India subcontinent -->
+    <path d="M600,140 L640,135 L660,170 L640,220 L610,230 L590,200 L585,165 Z" fill="#F0C840"/>
+    <!-- Southeast Asia -->
+    <path d="M720,140 L790,130 L820,160 L800,190 L760,200 L730,180 Z" fill="#F0C840"/>
+    <!-- Australia -->
+    <path d="M740,280 L840,270 L880,310 L870,370 L820,390 L760,370 L730,330 Z" fill="#F0C840"/>
+    <!-- Japan -->
+    <path d="M810,80 L830,75 L840,95 L825,105 L810,95 Z" fill="#F0C840"/>
+  </svg>
+</div>
+
+<!-- Jaipur glow -->
+<div id="jaipur-dot"></div>
+
+<!-- Vignette -->
+<div id="vignette"></div>
+
+<!-- App -->
+<div id="app">
+
+  <div class="wordmark">Wanderlust</div>
+
+  <!-- Passport -->
+  <div class="passport">
+    <div class="passport-foil"></div>
+
+    <div class="passport-country">
+      <div class="passport-emblem">🌍</div>
+      <div class="passport-country-text">
+        <span class="passport-country-name">World Traveler</span>
+        <span class="passport-type">Passport</span>
+      </div>
+    </div>
+
+    <div class="passport-divider"></div>
+
+    <div class="passport-info-row">
+      <div class="passport-photo">🧳</div>
+      <div class="passport-fields">
+        <div class="passport-field">
+          <span class="field-label">Traveler</span>
+          <span class="field-value empty">Your name here</span>
+        </div>
+        <div class="passport-field">
+          <span class="field-label">Cities Explored</span>
+          <span class="field-value">0 of 12</span>
+        </div>
+        <div class="passport-field">
+          <span class="field-label">Stamps Collected</span>
+          <span class="field-value">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="passport-stamps-label">Stamps</div>
+    <div class="passport-stamps-row">
+      <div class="stamp-slot active-slot">🏯</div>
+      <div class="stamp-slot empty-slot">✦</div>
+      <div class="stamp-slot empty-slot">✦</div>
+      <div class="stamp-slot empty-slot">✦</div>
+      <div class="stamp-slot empty-slot">✦</div>
+    </div>
+
+    <div class="passport-mrz">
+      P&lt;WLD&lt;TRAVELER&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;<br>
+      W4NDR1234&lt;5IND9901010F3112310&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;06
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat">
+      <span class="stat-num">0</span>
+      <span class="stat-label">Stamps</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <span class="stat-num">12</span>
+      <span class="stat-label">Cities</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <span class="stat-num">🏯</span>
+      <span class="stat-label">Next Stop</span>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-wrap">
+    <button class="btn-begin" onclick="beginJourney()">Begin Journey</button>
+    <span class="cta-sub">Start in Jaipur · Free</span>
+  </div>
+
+</div>
+
+<script>
+function beginJourney() {
+  document.querySelector('#app').style.transition = 'opacity 0.6s, transform 0.6s';
+  document.querySelector('#app').style.opacity = '0';
+  document.querySelector('#app').style.transform = 'translateY(-20px)';
+  setTimeout(() => {
+    alert('→ Transitions to World Map / City Select screen');
+  }, 600);
+}
+</script>
+</body>
+</html>
