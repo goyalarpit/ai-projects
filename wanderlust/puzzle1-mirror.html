@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wanderlust · Puzzle 1 — Mirror the Jali</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Jost:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Jost', sans-serif;
+  background: #0D0804;
+  color: #F0C840;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#app {
+  width: 100%;
+  max-width: 420px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 20px;
+}
+
+/* ── HEADER ── */
+.tag {
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.4;
+  margin-bottom: 6px;
+}
+.title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 6px;
+}
+.instruction {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.4;
+  text-align: center;
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+/* ── LEVEL TABS ── */
+.levels {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.lvl-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-family: 'Jost', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid rgba(240,200,64,0.2);
+  color: rgba(240,200,64,0.4);
+  transition: all 0.2s;
+}
+.lvl-btn.active {
+  background: rgba(240,200,64,0.12);
+  border-color: #F0C840;
+  color: #F0C840;
+}
+
+/* ── PUZZLE GRID ── */
+.grid-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 24px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(240,200,64,0.1);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.half { display: flex; flex-direction: column; gap: 5px; }
+
+.row { display: flex; gap: 5px; }
+
+.divider {
+  width: 1px;
+  background: rgba(240,200,64,0.25);
+  margin: 0 12px;
+  border-radius: 1px;
+}
+
+/* Cells */
+.cell {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Left side — given pattern */
+.cell.given {
+  background: #7B2D0F;
+  cursor: default;
+}
+.cell.given::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 4px;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 3px,
+    rgba(255,255,255,0.06) 3px,
+    rgba(255,255,255,0.06) 6px
+  );
+}
+.cell.given-empty {
+  background: rgba(255,255,255,0.04);
+  cursor: default;
+}
+
+/* Right side — player fills */
+.cell.blank {
+  background: rgba(240,200,64,0.05);
+  border: 1.5px solid rgba(240,200,64,0.15);
+  cursor: pointer;
+}
+.cell.blank:hover { border-color: rgba(240,200,64,0.4); background: rgba(240,200,64,0.1); }
+.cell.blank:active { transform: scale(0.94); }
+
+.cell.filled {
+  background: rgba(212,160,23,0.25);
+  border: 1.5px solid rgba(240,200,64,0.5);
+  cursor: pointer;
+}
+.cell.filled:hover { background: rgba(212,160,23,0.35); }
+
+.cell.correct {
+  background: rgba(240,200,64,0.3);
+  border: 1.5px solid #F0C840;
+  cursor: pointer;
+}
+
+.cell.wrong-flash {
+  animation: wflash 0.45s ease;
+}
+@keyframes wflash {
+  0%,100% { background: rgba(240,200,64,0.05); }
+  40% { background: rgba(255,60,60,0.45); border-color: rgba(255,80,80,0.8); }
+}
+
+/* ── LABELS ── */
+.half-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.35;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.grid-side { display: flex; flex-direction: column; align-items: center; }
+
+/* ── STATUS ── */
+.status {
+  font-size: 13px;
+  opacity: 0.5;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  min-height: 20px;
+  transition: all 0.3s;
+}
+.status.ok { color: #F0C840; opacity: 1; }
+
+/* ── BUTTONS ── */
+.btn-row { display: flex; gap: 10px; }
+
+.btn-hint {
+  flex: 1;
+  padding: 13px;
+  background: transparent;
+  border: 1px solid rgba(240,200,64,0.3);
+  color: #F0C840;
+  font-family: 'Jost', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: border-color 0.2s;
+}
+.btn-hint:hover { border-color: #F0C840; }
+
+.btn-reset {
+  padding: 13px 20px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.3);
+  font-family: 'Jost', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.btn-reset:hover { border-color: rgba(255,255,255,0.3); color: rgba(255,255,255,0.5); }
+
+/* ── WIN BANNER ── */
+#win-banner {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 28px;
+  border: 1px solid rgba(240,200,64,0.3);
+  border-radius: 16px;
+  margin-top: 20px;
+  background: rgba(240,200,64,0.05);
+  animation: fadeIn 0.5s ease;
+}
+#win-banner.show { display: flex; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.win-icon { font-size: 48px; margin-bottom: 10px; }
+.win-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; margin-bottom: 6px; }
+.win-sub { font-size: 11px; letter-spacing: 2px; opacity: 0.5; text-transform: uppercase; margin-bottom: 14px; }
+.win-stars { font-size: 22px; margin-bottom: 8px; }
+.win-fact { font-size: 12px; line-height: 1.7; opacity: 0.6; max-width: 260px; }
+
+.btn-next {
+  margin-top: 20px;
+  padding: 13px 36px;
+  background: #F0C840;
+  color: #0D0804;
+  border: none;
+  font-family: 'Jost', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 6px;
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="tag">Wanderlust · Jaipur · Puzzle 1 of 5</div>
+  <div class="title">Mirror the Jali</div>
+  <div class="instruction">The left panel is carved.<br>Complete the right to match it.</div>
+
+  <!-- Level selector -->
+  <div class="levels">
+    <button class="lvl-btn active" onclick="loadLevel(0)">Easy</button>
+    <button class="lvl-btn" onclick="loadLevel(1)">Medium</button>
+    <button class="lvl-btn" onclick="loadLevel(2)">Hard</button>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid-wrap">
+    <div class="grid-side">
+      <div class="half-label">Given</div>
+      <div class="half" id="left-grid"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="grid-side">
+      <div class="half-label">Mirror</div>
+      <div class="half" id="right-grid"></div>
+    </div>
+  </div>
+
+  <div class="status" id="status">Tap cells on the right to fill them</div>
+
+  <div class="btn-row">
+    <button class="btn-hint" onclick="hint()">💡 Hint</button>
+    <button class="btn-reset" onclick="resetRight()">Reset</button>
+  </div>
+
+  <!-- Win banner -->
+  <div id="win-banner">
+    <div class="win-icon">🏯</div>
+    <div class="win-title">Window Restored</div>
+    <div class="win-sub">Side Gallery · Hawa Mahal</div>
+    <div class="win-stars" id="win-stars"></div>
+    <div class="win-fact" id="win-fact"></div>
+    <button class="btn-next" onclick="nextLevel()">Next Window →</button>
+  </div>
+
+</div>
+
+<script>
+// ── LEVELS ───────────────────────────────────────────────────────────────────
+// Each level: rows × cols grid (per side). pattern = 2D array, 1=filled 0=empty.
+const LEVELS = [
+  {
+    label: 'Easy',
+    rows: 4, cols: 2,
+    pattern: [
+      [1, 0],
+      [0, 1],
+      [1, 1],
+      [1, 0],
+    ],
+    fact: 'Hawa Mahal was built so no two windows have the same jali design.',
+    stars_thresholds: [0, 2, 5], // wrong taps for 3★, 2★, 1★
+  },
+  {
+    label: 'Medium',
+    rows: 5, cols: 3,
+    pattern: [
+      [1, 0, 0],
+      [1, 1, 0],
+      [0, 1, 1],
+      [1, 0, 1],
+      [0, 1, 0],
+    ],
+    fact: 'Each of Hawa Mahal\'s 953 windows is a unique geometric jali pattern carved from pink sandstone.',
+    stars_thresholds: [0, 3, 7],
+  },
+  {
+    label: 'Hard',
+    rows: 6, cols: 4,
+    pattern: [
+      [1, 0, 1, 0],
+      [0, 1, 1, 0],
+      [1, 1, 0, 1],
+      [0, 1, 1, 0],
+      [1, 0, 0, 1],
+      [1, 1, 0, 0],
+    ],
+    fact: 'The jali lattice of Hawa Mahal creates a natural cooling system — wind passing through cools the interior by up to 10°C.',
+    stars_thresholds: [0, 4, 9],
+  },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let currentLevel = 0;
+let playerRight = [];   // 2D array of player-filled cells
+let wrongTaps = 0;
+let solved = false;
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function loadLevel(idx) {
+  currentLevel = idx;
+  wrongTaps = 0;
+  solved = false;
+
+  const lv = LEVELS[idx];
+  playerRight = Array.from({ length: lv.rows }, () => Array(lv.cols).fill(0));
+
+  document.querySelectorAll('.lvl-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+  document.getElementById('win-banner').classList.remove('show');
+  document.getElementById('status').className = 'status';
+  document.getElementById('status').textContent = 'Tap cells on the right to fill them';
+
+  renderLeft();
+  renderRight();
+}
+
+function renderLeft() {
+  const lv = LEVELS[currentLevel];
+  const grid = document.getElementById('left-grid');
+  grid.innerHTML = '';
+  lv.pattern.forEach(row => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'row';
+    row.forEach(val => {
+      const cell = document.createElement('div');
+      cell.className = 'cell ' + (val ? 'given' : 'given-empty');
+      rowEl.appendChild(cell);
+    });
+    grid.appendChild(rowEl);
+  });
+}
+
+function renderRight() {
+  const lv = LEVELS[currentLevel];
+  const grid = document.getElementById('right-grid');
+  grid.innerHTML = '';
+
+  lv.pattern.forEach((row, r) => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'row';
+    // Mirror: col 0 on right = col (cols-1) on left
+    for (let c = 0; c < lv.cols; c++) {
+      const mirrorCol = lv.cols - 1 - c;
+      const isCorrect = playerRight[r][c] === 1 && lv.pattern[r][mirrorCol] === 1;
+      const isFilled  = playerRight[r][c] === 1;
+
+      const cell = document.createElement('div');
+
+      if (isFilled && isCorrect) {
+        cell.className = 'cell correct';
+      } else if (isFilled) {
+        cell.className = 'cell filled';
+      } else {
+        cell.className = 'cell blank';
+      }
+
+      cell.addEventListener('click', () => tapRight(r, c));
+      rowEl.appendChild(cell);
+    }
+    grid.appendChild(rowEl);
+  });
+}
+
+// ── INTERACTION ───────────────────────────────────────────────────────────────
+function tapRight(r, c) {
+  if (solved) return;
+  const lv = LEVELS[currentLevel];
+  const mirrorCol = lv.cols - 1 - c;
+  const shouldBeFilled = lv.pattern[r][mirrorCol] === 1;
+
+  if (playerRight[r][c] === 1) {
+    // Untoggle
+    playerRight[r][c] = 0;
+  } else {
+    playerRight[r][c] = 1;
+    if (!shouldBeFilled) {
+      wrongTaps++;
+      // Flash wrong
+      const cells = document.getElementById('right-grid').querySelectorAll('.cell');
+      const flatIdx = r * lv.cols + c;
+      cells[flatIdx].classList.add('wrong-flash');
+      setTimeout(() => {
+        playerRight[r][c] = 0;
+        renderRight();
+      }, 450);
+      updateStatus();
+      return;
+    }
+  }
+
+  renderRight();
+  updateStatus();
+  checkComplete();
+}
+
+function updateStatus() {
+  if (solved) return;
+  const lv = LEVELS[currentLevel];
+  let filled = 0, total = 0;
+  lv.pattern.forEach(row => row.forEach(v => { if (v) total++; }));
+  lv.pattern.forEach((row, r) => row.forEach((v, c) => {
+    const mirrorCol = lv.cols - 1 - c;
+    if (lv.pattern[r][mirrorCol] && playerRight[r][c]) filled++;
+  }));
+  const pct = Math.round((filled / total) * 100);
+  const st = document.getElementById('status');
+  st.textContent = pct === 0 ? 'Tap cells on the right to fill them' : `${filled} of ${total} cells mirrored`;
+}
+
+function checkComplete() {
+  const lv = LEVELS[currentLevel];
+  for (let r = 0; r < lv.rows; r++) {
+    for (let c = 0; c < lv.cols; c++) {
+      const mirrorCol = lv.cols - 1 - c;
+      const shouldBe = lv.pattern[r][mirrorCol];
+      if (playerRight[r][c] !== shouldBe) return;
+    }
+  }
+  // Solved!
+  solved = true;
+  const stars = wrongTaps <= lv.stars_thresholds[0] ? 3
+              : wrongTaps <= lv.stars_thresholds[1] ? 2 : 1;
+
+  document.getElementById('status').textContent = 'Perfect symmetry!';
+  document.getElementById('status').className = 'status ok';
+
+  setTimeout(() => {
+    document.getElementById('win-stars').textContent = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+    document.getElementById('win-fact').textContent = lv.fact;
+    document.getElementById('win-banner').classList.add('show');
+  }, 500);
+}
+
+// ── HINT ──────────────────────────────────────────────────────────────────────
+function hint() {
+  if (solved) return;
+  const lv = LEVELS[currentLevel];
+  // Find first unfilled correct cell
+  for (let r = 0; r < lv.rows; r++) {
+    for (let c = 0; c < lv.cols; c++) {
+      const mirrorCol = lv.cols - 1 - c;
+      if (lv.pattern[r][mirrorCol] === 1 && playerRight[r][c] === 0) {
+        playerRight[r][c] = 1;
+        renderRight();
+        updateStatus();
+        checkComplete();
+        return;
+      }
+    }
+  }
+}
+
+function resetRight() {
+  if (solved) return;
+  const lv = LEVELS[currentLevel];
+  playerRight = Array.from({ length: lv.rows }, () => Array(lv.cols).fill(0));
+  renderRight();
+  document.getElementById('status').textContent = 'Tap cells on the right to fill them';
+  document.getElementById('status').className = 'status';
+}
+
+function nextLevel() {
+  const next = (currentLevel + 1) % LEVELS.length;
+  loadLevel(next);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+loadLevel(0);
+</script>
+</body>
+</html>
